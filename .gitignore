@@ -47,3 +47,9 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+
+
+
+## similarity_compute/.idea
+.idea/
