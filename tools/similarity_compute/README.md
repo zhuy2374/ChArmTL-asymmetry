@@ -1,10 +1,14 @@
 ### Pedigree-Based Computational Tool for Telomere Variant Repeat (TVR) Sequence Similarity
 
+This part provides a computational tool for calculating sequence similarity between offspring and parental Telomere Variant Repeat (TVR) sequences based on Telogator2 results.
+
 #### Getting Started
 
 1. Install **uv** and **python 3.12**:
 
    ```shell
+   cd ChArmTL_asymmetry/tools/similarity_compute
+   
    # Install the uv package manager
    curl -LsSf https://astral.sh/uv/install.sh | sh
    
@@ -25,7 +29,7 @@
    uv run ./scripts/run_compute_similarity.py "<root_dir>"
    
    # If individual Telogator2 result files do not follow the family naming convention, run:
-   uv run ./scripts/run_compute_similarity_use_ped.py "<root_dir>"
+   uv run ./scripts/run_compute_similarity_use_ped.py "<root_dir>" --family_list "/path/to/family_list.ped"
    ```
 
    #### Parameter Description：
