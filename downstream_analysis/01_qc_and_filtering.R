@@ -21,7 +21,8 @@ telogator2_0 <- read_delim("merged_tlens_by_allele.tsv", delim = "\t", escape_do
 #################### Extract columns for subsequent analysis ####################
 colnames(telogator2_0)
 
-telogator2_0 <- telogator2_0[,c(1,2,5,6,7,10)]    # "Sample", "#chr", "allele_id", "TL_p75", "read_TLs", "tvr_len"
+telogator2_0 <- telogator2_0 %>% 
+  select(Sample, `#chr`, allele_id, TL_p75, read_TLs, tvr_len)    # select "Sample", "#chr", "allele_id", "TL_p75", "read_TLs", "tvr_len"
 
 
 ############################### QC and filtering ###############################
