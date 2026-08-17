@@ -155,6 +155,7 @@ write_xlsx(sex_diff, "sex_diff.xlsx")
 
 
 ######################### Sex difference visualization #########################
+########diploid-level
 sex_diff_dip_plot <- sex_diff %>%
   filter(level == "Diploid", term == "sexFemale") %>%
   mutate(chr_number = if_else(chr == "mTL", "mTL", str_extract(chr, "\\d+[pq]")),
@@ -176,7 +177,7 @@ p1 <- ggplot(sex_diff_dip_plot, aes(x = chr_number, y = abs(estimate), color = e
   scale_size_continuous(range = c(0.5,3), breaks = c(1, -log10(0.05), 2, 3, 4), labels = c("ns","0.05","0.01","0.001", "0.0001"))+    # Control the minimum and maximum sizes of the bubbles
   labs(x = NULL, y = "Mean difference (bp)", size = "P", color = NULL)+
   guides(color = guide_legend(override.aes = list(size = 1.5), position = "top", order = 1), 
-         size = guide_legend(override.aes = list(shape = 1, stroke = 0.35), position = "top", order = 2),
+         size = guide_legend(override.aes = list(shape = c(1,16,16,16,16), stroke = 0.35), position = "top", order = 2),
          shape = "none")+    # Modify the scatter point size in the legend and the legend position
   theme(axis.line = element_blank(),
         axis.ticks =  element_line(linewidth = 0.2),
@@ -193,6 +194,55 @@ p1 <- ggplot(sex_diff_dip_plot, aes(x = chr_number, y = abs(estimate), color = e
         panel.grid = element_blank(),
         panel.border = element_rect(linewidth = 0.35),
         plot.margin = margin(t = 0.5, b = 0.5, l = 0.5, r = 0.5, unit = "cm"))
+
+
+########haploid-level
+sex_diff_hap_plot <- sex_diff %>%
+  filter(level != "Diploid", term == "sexFemale") %>%
+  mutate(chr_number = if_else(chr == "mTL", "mTL", str_extract(chr, "\\d+[pq]")),
+         estimate_sign = ifelse(estimate > 0, "Female > Male", "Female < Male"),
+         level = factor(level, levels = c("Pat","Mat")),
+         significance = ifelse(p.value < 0.05, "Significant", "Not Significant"),
+         logP = ifelse(p.value < 0.05, -log10(p.value), 1))
+
+sex_diff_hap_plot$estimate_sign <- factor(sex_diff_hap_plot$estimate_sign, levels = c("Female > Male", "Female < Male"))
+sex_diff_hap_plot$significance <- factor(sex_diff_hap_plot$significance, levels = c("Significant", "Not Significant"))
+
+p2 <- ggplot(sex_diff_hap_plot, aes(x = chr_number, y = abs(estimate), color = estimate_sign, shape = significance, size = logP))+
+  geom_point(stroke = 0.35)+
+  facet_wrap2(level ~ ., nrow = 2, scales = "free_y", strip.position = "right",
+              strip = strip_themed(background_y = elem_list_rect(fill = c("#82ADD080","#EB636880"))))+
+  scale_color_manual(values = c("#EB6368","#82ADD0"))+
+  scale_shape_manual(values = c("Significant" = 16, "Not Significant" = 1))+
+  theme_bw()+
+  scale_x_discrete(limits = c("1p","1q","2p","2q","3p","3q","4p","4q","5p","5q","6p","6q","7p","7q","8p","8q","9p","9q","10p","10q",
+                              "11p","11q","12p","12q","13q","14q","16p","16q","17p","17q","18p","18q","19p","19q","20p","20q","21q","22q", "mTL"))+
+  facetted_pos_scales(y = list(level == "Pat" ~ scale_y_continuous(expand = c(0,0), limits = c(0,1700), breaks = c(500,1000,1500), labels = c("500","1,000","1,500")),
+                               level == "Mat" ~ scale_y_continuous(expand = c(0,0), limits = c(0,2200), breaks = c(500,1000,1500,2000), labels = c("500","1,000","1,500","2,000"))))+
+  scale_size_continuous(range = c(0.5,3), breaks = c(1, -log10(0.05), 2, 3, 4), labels = c("ns","0.05","0.01","0.001", "0.0001"))+    #控制气泡的最小和最大尺寸
+  labs(x = NULL, y = "Mean difference (bp)", size = "P", color = NULL)+
+  guides(color = guide_legend(override.aes = list(size = 1.5), position = "top", order = 1), 
+         size = guide_legend(override.aes = list(shape = c(1,16,16,16,16), stroke = 0.35), position = "top", order = 2),
+         shape = "none")+    #修改图例中散点大小和图例位置
+  theme(axis.line = element_blank(),
+        axis.ticks =  element_line(linewidth = 0.2),
+        axis.ticks.length = unit(0.05,"cm"),
+        axis.text.x = element_text(size = 6, hjust = 1, angle = 70),
+        axis.text.y = element_text(size = 6),
+        axis.title.y = element_text(size = 7),
+        legend.text = element_text(size = 6),
+        legend.title = element_text(size = 7),
+        legend.key.height = unit(0.3, "cm"),
+        legend.key.width = unit(0.3, "cm"),
+        legend.box.margin = margin(t = 0.01, b = 0.01, l = 0.01, r = 0.01, unit = "cm"),
+        legend.box.spacing = unit(0.01, "cm"),    #图例框离plot区域的距离
+        strip.text = element_text(size = 7),
+        strip.background = element_rect(linewidth = 0.35),
+        panel.grid = element_blank(),
+        panel.border = element_rect(linewidth = 0.35),
+        plot.margin = margin(t = 0.5, b = 0.5, l = 0.5, r = 0.5, unit = "cm"))
+
+ggsave(filename = "Supplementary Figure 4.pdf", plot = p2, width = 15, height = 8, units = "cm", dpi = 600)
 
 
 ##################### Sex difference direction consistency #####################
@@ -233,12 +283,13 @@ write_xlsx(age_cor, "age_correlation.xlsx")
 
 
 ######################### Age correlation visualization #########################
+########diploid水平
 age_cor_dip_plot <- age_cor %>%
   filter(level == "Diploid") %>%
   mutate(chr_number = if_else(chr == "mTL", "mTL", str_extract(chr, "\\d+[pq]")),
          logP = ifelse(p.value > 1e-10, -log10(p.value), -log10(p.value)-10))    # Note the p-value range, the p-value for mTL is vastly different from the chromosome arms
 
-p2 <- ggplot(age_cor_dip_plot, aes(x = chr_number, y = estimate, size = logP, color = logP))+
+p3 <- ggplot(age_cor_dip_plot, aes(x = chr_number, y = estimate, size = logP, color = logP))+
   geom_point()+
   scale_color_gradientn(colors = c("lightgrey", "#EB6368", "darkred"), values = rescale(c(0, 1.23, 8.8)), name = "-log10(P)")+
   theme_bw()+
@@ -264,6 +315,54 @@ p2 <- ggplot(age_cor_dip_plot, aes(x = chr_number, y = estimate, size = logP, co
         panel.grid = element_blank(),
         panel.border = element_rect(linewidth = 0.35),
         plot.margin = margin(t = 0.5, b = 0.5, l = 0.5, r = 0.5, unit = "cm"))
+
+
+########haploid-level
+age_cor_hap_plot <- age_cor %>%
+  filter(level != "Diploid") %>%
+  mutate(chr_number = if_else(chr == "mTL", "mTL", str_extract(chr, "\\d+[pq]")),
+         logP = -log10(p.value),
+         level = factor(level, levels = c("Pat","Mat")))
+
+p4 <- ggplot(age_cor_hap_plot, aes(x = chr_number, y = estimate, size = logP, color = logP))+
+  geom_point()+
+  geom_hline(yintercept = 0, linetype = "dashed", linewidth = 0.2, color = "grey60")+
+  facet_wrap2(level ~ ., nrow = 2, strip.position = "right",
+              strip = strip_themed(background_y = elem_list_rect(fill = c("#82ADD080","#EB636880"))))+
+  scale_color_gradientn(colors = c("lightgrey", "#EB6368", "darkred"), values = rescale(c(0, -log10(0.05), 3.1)), name = "-log10(P)")+
+  theme_bw()+
+  scale_x_discrete(limits = c("1p","1q","2p","2q","3p","3q","4p","4q","5p","5q","6p","6q","7p","7q","8p","8q","9p","9q","10p","10q",
+                              "11p","11q","12p","12q","13q","14q","16p","16q","17p","17q","18p","18q","19p","19q","20p","20q","21q","22q", "mTL"))+
+  scale_y_reverse(expand =c(0,0), limits = c(-230,80), breaks = c(-200,-150,-100,-50,0,50), labels = c(200,150,100,50,0,-50))+
+  scale_size_continuous(range = c(0.5,3))+    #控制气泡的最小和最大尺寸
+  labs(x = NULL, y = "Annual rate of TL loss (bp/year)", size = NULL)+
+  guides(size = "none")+    #修改图例中散点大小和图例位置
+  theme(axis.line = element_blank(),
+        axis.ticks =  element_line(linewidth = 0.2),
+        axis.ticks.length = unit(0.05,"cm"),
+        axis.text.x = element_text(size = 6, hjust = 1, angle = 70),
+        axis.text.y = element_text(size = 6),
+        axis.title.y = element_text(size = 7),
+        legend.position = "right",
+        legend.text = element_text(size = 6),
+        legend.title = element_text(size = 7),
+        legend.key.height = unit(0.3, "cm"),
+        legend.key.width = unit(0.3, "cm"),
+        legend.box.margin = margin(t = 0.01, b = 0.01, l = 0.01, r = 0.01, unit = "cm"),
+        legend.box.spacing = unit(0.01, "cm"),    #图例框离plot区域的距离
+        strip.text = element_text(size = 7),
+        strip.background = element_rect(linewidth = 0.35),
+        panel.grid = element_blank(),
+        panel.border = element_rect(linewidth = 0.35),
+        plot.margin = margin(t = 0.5, b = 0.5, l = 0.5, r = 0.5, unit = "cm"))
+
+ggsave(filename = "Supplementary Figure 5.pdf", plot = p4, width = 15, height = 8, units = "cm", dpi = 600)
+
+
+########Figure 1 - cowplot
+p1_3 <- plot_grid(p1, p3, nrow = 2, labels = c('a', 'b'), label_size = 8, rel_heights = c(1,0.9), align = 'v', axis = 'lr')
+
+ggsave(filename = "Figure 1.pdf", plot = p1_3, width = 17, height = 11, units = "cm", dpi = 600)
 
 
 ####################### Conserved rank order of ChArmTLs #######################
@@ -304,7 +403,7 @@ tlens_sample_rank <- tlens_sample_rank %>%    # Merge original data and statisti
 tlens_sample_rank$chr_number <- substr(tlens_sample_rank$chr,4,nchar(as.character(tlens_sample_rank$chr)))    # Remove "chr" from chromosome arms
 sample_arm_rank$chr_number <- substr(sample_arm_rank$chr,4,nchar(as.character(sample_arm_rank$chr)))
 
-p3 <- ggplot()+
+p5 <- ggplot()+
   geom_jitter(data = tlens_sample_rank, aes(x = reorder_within(chr_number, rank_z_score, clinical_group), y = z_score, color = clinical_group),
               width = 0.25, size = 0.75, show.legend = FALSE)+    # Jitter points, color by clinical_group (distinguishable within facets)
   geom_errorbar(data = sample_arm_rank, aes(x = reorder_within(chr_number, rank_z_score, clinical_group), ymin = mean_z_score - sd_z_score, ymax = mean_z_score + sd_z_score),
@@ -329,8 +428,6 @@ p3 <- ggplot()+
         panel.grid = element_blank(),
         panel.border = element_rect(linewidth = 0.35),
         plot.margin = margin(t = 0.5, b = 0.5, l = 0.5, r = 0.5, unit = "cm"))
-
-ggsave(filename = "Supplementary Figure 4.pdf", plot = p1, width = 17, height = 15, units = "cm", dpi = 600)
 
 
 ########offspring haplotypes
@@ -374,7 +471,7 @@ tlens_hap_rank <- tlens_hap_rank %>%    # Merge original data and statistics for
 tlens_hap_rank$chr_number <- substr(tlens_hap_rank$chr,4,nchar(as.character(tlens_hap_rank$chr)))    # Remove "chr" from chromosome arms
 hap_arm_rank$chr_number <- substr(hap_arm_rank$chr,4,nchar(as.character(hap_arm_rank$chr)))
 
-p4 <- ggplot()+
+p6 <- ggplot()+
   geom_jitter(data = tlens_hap_rank, aes(x = reorder_within(chr_number, rank_z_score, phase_group), y = z_score, color = phase_group),
               width = 0.25, size = 0.75, show.legend = FALSE)+    # Jitter points, color by phase_group (distinguishable within facets)
   geom_errorbar(data = hap_arm_rank, aes(x = reorder_within(chr_number, rank_z_score, phase_group), ymin = mean_z_score - sd_z_score, ymax = mean_z_score + sd_z_score),
@@ -400,7 +497,7 @@ p4 <- ggplot()+
         panel.border = element_rect(linewidth = 0.35),
         plot.margin = margin(t = 0.5, b = 0.5, l = 0.5, r = 0.5, unit = "cm"))
 
-ggsave(filename = "Supplementary Figure 5.pdf", plot = p2, width = 17, height = 15, units = "cm", dpi = 600)
+ggsave(filename = "Supplementary Figure 6.pdf", plot = p2, width = 17, height = 15, units = "cm", dpi = 600)
 
 
 ##################### Heatmap of ChArmTL rank conservation ######################
@@ -445,7 +542,7 @@ col_fun <- colorRamp2(seq(min(arm_conservatism_matrix_t, na.rm = TRUE),
 ######## Create row split factor (groups of 4 rows, last group with 2 rows)
 row_split <- factor(rep(c("Group1", "Group2", "Group3"), times = c(4, 4, 2)))
 
-p5 <- Heatmap(arm_conservatism_matrix_t,
+p7 <- Heatmap(arm_conservatism_matrix_t,
               column_title = "Rank order of ChArmTL",    # Column title
               column_title_side = "top",    # Column title position
               column_title_gp = gpar(fontsize = 8, fontface = "bold"),    # Column title font size, bold
@@ -467,16 +564,12 @@ p5 <- Heatmap(arm_conservatism_matrix_t,
                 grid_width = unit(2, "mm"))      # Adjust the thickness of the color bar
 )
 
-p5_1 <- as.ggplot(p5) + theme(plot.margin = margin(t = 0.1, b = 0.1, l = 0.1, r = 0.1, unit = "cm"))
+p7_1 <- as.ggplot(p7) + theme(plot.margin = margin(t = 0.1, b = 0.1, l = 0.1, r = 0.1, unit = "cm"))
 
 
 ######## Combine plots
-p1_2 <- plot_grid(p1, p2, nrow = 2, labels = c('a', 'b'), label_size = 8, rel_heights = c(1,0.9), align = 'v', axis = 'lr')
-p5_1_NULL <- plot_grid(p5_1, NULL, nrow = 1, labels = c('c', ''), label_size = 8, rel_widths = c(1,0.05), align = 'h', axis = 'tb')
-
-p1_2_3 <- plot_grid(p1_2, p5_1_NULL, ncol = 1, rel_heights = c(1,0.6), align = 'v')
-
-ggsave(filename = "Figure 1.pdf", plot = p1_2_3, width = 17, height = 17, units = "cm", dpi = 600)
+p5_7 <- plot_grid(p1, p7_1, ncol = 1, labels = c('a', 'b'), label_size = 8, rel_heights = c(1,0.5), align = 'v')
+ggsave(filename = "Figure 2.pdf", plot = p5_7, width = 17, height = 17, units = "cm", dpi = 600)
 
 
 ############### Correlation of ChArmTL rank order across groups ################
@@ -485,7 +578,7 @@ arm_conservatism_cor <- rcorr(arm_conservatism_matrix, type = "spearman")    # C
 write.csv(arm_conservatism_cor$r, "arm_conservatism_cor.csv")
 write.csv(arm_conservatism_cor$P, "arm_conservatism_cor_P.csv")
 
-pdf("Supplementary Figure 6.pdf", width = 5, height = 5)
+pdf("Supplementary Figure 7.pdf", width = 5, height = 5)
 corrplot(arm_conservatism_cor$r,
          method = "color",
          col = colorRampPalette(c("#2166ac","white","#b2182b"))(100),
@@ -496,3 +589,4 @@ corrplot(arm_conservatism_cor$r,
          tl.col = "black",
          tl.srt = 45)
 dev.off()
+
