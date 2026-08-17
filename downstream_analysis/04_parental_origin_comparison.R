@@ -180,7 +180,7 @@ p3 <- ggplot(diff_sib_asd_corr_plot, aes(x = Sibling, y = ASD, label = chr_numbe
         axis.title.y = element_text(size = 7),
         plot.margin = margin(t = 0.5, b = 0.5, l = 0.5, r = 0.5, unit = "cm"))
 
-ggsave(filename = "Supplementary Figure 7.pdf", plot = p3, width = 8, height = 8, units = "cm", dpi = 600)
+ggsave(filename = "Supplementary Figure 8.pdf", plot = p3, width = 8, height = 8, units = "cm", dpi = 600)
 
 
 ############## Directionality of paternal vs maternal differences (by chromosome arm) ##############
@@ -265,7 +265,7 @@ p4_NULL <- plot_grid(p4, NULL, labels = c('',''), nrow = 1, rel_widths = c(1,0.0
 p1_2_4 <- plot_grid(p1_2, p4_NULL, ncol = 1, labels =c('a','b'), label_size = 8, 
                     align = 'v', axis = 'lr', rel_heights = c(1,2))
 
-ggsave(filename = "Figure 2.pdf", plot = p1_2_4, width = 17, height = 15, units = "cm", dpi = 600)
+ggsave(filename = "Figure 3.pdf", plot = p1_2_4, width = 17, height = 15, units = "cm", dpi = 600)
 
 
 ############# Directionality of paternal vs maternal differences (by individual) ############
@@ -325,5 +325,5 @@ p5 <- ggplot(data = direction_sample_plot, aes(x = sample, y = counts, fill = di
         panel.border = element_rect(linewidth = 0.35),
         plot.margin = margin(t = 0.5, b = 0.5, l = 0.5, r = 0.5, unit = "cm"))
 
-ggsave(filename = "Supplementary Figure 8.pdf", plot = p5, width = 15, height = 8, units = "cm", dpi = 600)
+ggsave(filename = "Supplementary Figure 9.pdf", plot = p5, width = 15, height = 8, units = "cm", dpi = 600)
 
