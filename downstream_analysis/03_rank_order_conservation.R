@@ -613,7 +613,7 @@ p10 <- ggplot(rank_arm_all, aes(x = allele_diff, y = ChArmTL, label = chr_number
         plot.margin = margin(t = 0.25, b = 0.5, l = 0.25, r = 0.5, unit = "cm"))
 
 
-#################################### cowplot ###################################
+################################## plot layout #################################
 ######## Figure 1
 p1_3 <- plot_grid(p1, p3, ncol = 1, labels = c('a', 'b'), label_size = 8, rel_widths = c(1,1), align = 'v')
 p7_9 <- plot_grid(p7, p9, ncol = 2, labels = c('c', 'd'), label_size = 8, rel_widths = c(1.25,1), align = 'h')
