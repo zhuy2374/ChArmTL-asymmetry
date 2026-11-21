@@ -151,7 +151,7 @@ p2_3 <- plot_grid(p2_null, p3, ncol = 1, labels = c('','b'), label_size = 8, rel
 ggsave(filename = "Supplementary Figure 2.pdf", plot = p2_3, width = 17, height = 9, units = "cm", dpi = 600)
 
 
-###### Count telomere-length observations per sample and offspring subtype #####
+########## Count telomere-length observations per sample and haplotype #########
 tlens_chr_filtered <- telogator2_5 %>%
   filter(!chr %in% c("chr13p", "chr14p", "chr15p", "chr21p", "chr22p", "chr15q"))    # 7735 rows
 
